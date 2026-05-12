@@ -1,5 +1,6 @@
 #pragma once
 #include "utils.h"
+#include "my_alloc.h"
 
 // Interesting topics here:
 // 1. Exception safety in push_back
@@ -7,24 +8,8 @@
 // 3. Self-assignment problem
 // 4. Copy-and-swap idiom
 
-// 5. small vector optimization
-// 6. is_trivially_copyable optimisation
-
-template <typename T>
-class my_alloc
-{
-    public:
-    T* allocate(size_t size)
-    {
-        return static_cast<T*>(operator new(size * sizeof(T)));
-    }
-
-    void deallocate(T* ptr, size_t size)
-    {
-        operator delete(ptr);
-    }
-};
-
+// 5. TO DO small vector optimization
+// 6. TO DO is_trivially_copyable optimisation
  
 
 template <typename T, typename Allocator = my_alloc<T>>
