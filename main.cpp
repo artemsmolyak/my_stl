@@ -1,10 +1,12 @@
 #include <cassert>
 #include <iostream>
+#include <string>
 
 #include "my_unique_ptr_tests.h"
 #include "my_vector_tests.h"
 #include "my_vector.h"
  
+#include "benchmark.h"
 
 #define RUN_TEST(name) \
 std::cout << "===== " #name " =====" << std::endl; \
@@ -32,8 +34,64 @@ int main()
     RUN_TEST(my_unique_ptr_tests::test_move_assignment);
     RUN_TEST(my_unique_ptr_tests::test_reset);
     RUN_TEST(my_unique_ptr_tests::test_release);
-    
-    log("All tests passed");
 
+    log("All tests passed\n\n");
+    
+    // benchmark
+    constexpr size_t N = 10'000'000;
+
+    benchmark_push_back<std::vector<int>>(
+        "std::vector<int>", 10'000'000,
+        [](size_t i) { return (int)i; }
+    );
+
+    benchmark_push_back<std::vector<int>>(
+        "my_vector<int>", 10'000'000,
+        [](size_t i) { return (int)i; }
+    );
+    log("\n");
+
+    benchmark_push_back<std::vector<std::string>>(
+        "std::vector<string>", 1'000'000,
+        [](size_t i)
+        {
+            return std::string("hello_") + std::to_string(i);
+        }
+    );
+
+    benchmark_push_back<std::vector<std::string>>(
+        "my_vector<string>", 1'000'000,
+        [](size_t i)
+        {
+            return std::string("hello_") + std::to_string(i);
+        }
+    );
+    log("\n");
+
+    benchmark_push_back<std::vector<MyTestType>>(
+        "std::vector my type",
+        1'000'000,
+        [](size_t i)
+        {
+            return MyTestType{
+                (int)i,
+                "data_" + std::to_string(i)
+            };
+        }
+    );
+
+
+    benchmark_push_back<my_vector<MyTestType>>(
+        "my vector my type",
+        1'000'000,
+        [](size_t i)
+        {
+            return MyTestType{
+                (int)i,
+                "data_" + std::to_string(i)
+            };
+        }
+    );
+ 
     return 0;
 }

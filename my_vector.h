@@ -15,12 +15,12 @@
 template <typename T, typename Allocator = my_alloc<T>>
 class my_vector
 {
+    //memory
+    [[no_unique_address]] Allocator m_alloc; //! can be 8 bytes or 0 with no_unique_address  
+
     T* m_data; //8 byte
     size_t m_size; //8 byte
     size_t m_capacity; //8 byte
-
-    //memory
-    [[no_unique_address]] Allocator m_alloc; //! can be 8 bytes or 0 with no_unique_address  
 
 public:
 my_vector():
@@ -31,21 +31,22 @@ my_vector(const my_vector& other):
 m_size(other.m_size),
 m_capacity(other.m_capacity),
 m_alloc(other.m_alloc),
-m_data(nullptr)
+m_data(m_alloc.allocate(other.m_capacity))
 {
-    m_data = m_alloc.allocate(m_capacity);
-    size_t constructed = 0;
+    // also can use std::uninialized_copy here
+    auto current_ptr = begin();
+    auto other_ptr = other.begin();
     try{        
-        for(size_t i = 0; i < other.m_size; ++i)
+        for(; current_ptr != end(); ++current_ptr, ++other_ptr)
         {
-            new (m_data + i) T(other.m_data[i]);
-            ++constructed;
+            new (current_ptr) T(*other_ptr);
         }
     }
     catch(...)
     {
-        for(size_t i = 0; i < constructed; i++)
-            m_data[i].~T();
+        auto it = begin();
+        for(; it != current_ptr; ++it)
+            (*it).~T();
             
         m_alloc.deallocate(m_data, m_capacity);
         throw;    
@@ -72,19 +73,16 @@ m_data(std::exchange(other.m_data, nullptr))
 
 
 void reallocation(size_t new_capacity)
-{
-    T* tmp = nullptr;
-    //size_t new_capacity = (m_capacity == 0) ? 1 : m_capacity * 2;
+{   
+    T* tmp = m_alloc.allocate(new_capacity); // can throw bad alloc
     size_t constructed = 0;
     try 
-    {
-        tmp = m_alloc.allocate(new_capacity); // can throw bad alloc
-        for(int i = 0; i < m_size; ++i)
+    {   
+        for(; constructed < m_size; ++constructed)
         { 
-            new (tmp + i) T(std::move_if_noexcept(m_data[i])); //can throw T exception 
-            ++constructed;
+            new (tmp + constructed) T(std::move_if_noexcept(m_data[constructed])); //can throw T exception 
         } 
-        }
+    }
     catch(...)
     {
         for(size_t i = 0; i < constructed; ++i)
@@ -112,9 +110,7 @@ void reallocation(size_t new_capacity)
 // v.push_back(v[0]) - self assigmnent problem
 
 void push_back(const T& temp_value)
-{ 
-    log("void push_back(const T& temp_value)");
-
+{
     // for self assigmnent problem
     T value = temp_value;
 
@@ -129,8 +125,6 @@ void push_back(const T& temp_value)
 
 void push_back(T&& value)
 {
-    log("push_back(T&& value)");
-
     if (m_size >= m_capacity)
     {
         reallocation((m_capacity == 0) ? 1 : m_capacity * 2);
@@ -189,8 +183,17 @@ T* begin()
 {
     return m_data;
 }
+T* begin() const
+{
+    return m_data;
+}
 
 T* end()
+{
+    return m_data + m_size;
+}
+
+T* end() const
 {
     return m_data + m_size;
 }
