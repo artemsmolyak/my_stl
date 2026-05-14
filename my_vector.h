@@ -15,6 +15,12 @@
 template <typename T, typename Allocator = my_alloc<T>>
 class my_vector
 {
+public:
+    using my_type = T;
+    using iterator = T*;
+    using const_iterator = const T*;
+
+private:
     //memory
     [[no_unique_address]] Allocator m_alloc; //! can be 8 bytes or 0 with no_unique_address  
 
@@ -23,7 +29,7 @@ class my_vector
     size_t m_capacity; //8 byte
 
 public:
-my_vector():
+my_vector(const Allocator alloc = Allocator()):
 m_data(nullptr), m_size(0), m_capacity(0)
 {}
 
@@ -105,7 +111,6 @@ void reallocation(size_t new_capacity)
 }
 
 
-
 // =======>  exception safety <==========
 // v.push_back(v[0]) - self assigmnent problem
 
@@ -148,6 +153,18 @@ bool empty() const
     return m_size == 0;
 }
 
+template <typename... Args> // set of types
+void emplace_back(Args&&... args) // set of variables
+{
+    if (m_size >= m_capacity)
+    {
+        reallocation((m_capacity == 0) ? 1 : m_capacity * 2);
+    }    
+
+    new (m_data + m_size) T(std::forward<Args>(args)...);
+    ++m_size;
+}
+
 
 
 // =====> copy and swap idiom <=============
@@ -177,23 +194,22 @@ bool operator==(const T& other)
     return m_size == other.m_size && std::equal(begin(), end(), other.begin());
 }
 
-
+ 
 // requrement for using iterators with STL algorithms
-T* begin()
+iterator begin()
 {
     return m_data;
 }
-T* begin() const
+const_iterator begin() const
 {
     return m_data;
 }
-
-T* end()
+iterator end()
 {
     return m_data + m_size;
 }
 
-T* end() const
+const_iterator end() const
 {
     return m_data + m_size;
 }

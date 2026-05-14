@@ -49,6 +49,12 @@ int main()
         "my_vector<int>", 10'000'000,
         [](size_t i) { return (int)i; }
     );
+
+    benchmark_push_back<my_vector<int, arena_allocator<int> > >(
+        "my_vector<int, my allocator>", 10'000'000,
+        [](size_t i) { return (int)i; }
+    );
+
     log("\n");
 
     benchmark_push_back<std::vector<std::string>>(
@@ -61,6 +67,14 @@ int main()
 
     benchmark_push_back<std::vector<std::string>>(
         "my_vector<string>", 1'000'000,
+        [](size_t i)
+        {
+            return std::string("hello_") + std::to_string(i);
+        }
+    );
+
+    benchmark_push_back< my_vector<std::string, arena_allocator<std::string> > >(
+        "my_vector<string> + arena allocator", 1'000'000,
         [](size_t i)
         {
             return std::string("hello_") + std::to_string(i);
@@ -80,9 +94,20 @@ int main()
         }
     );
 
-
     benchmark_push_back<my_vector<MyTestType>>(
         "my vector my type",
+        1'000'000,
+        [](size_t i)
+        {
+            return MyTestType{
+                (int)i,
+                "data_" + std::to_string(i)
+            };
+        }
+    );
+
+    benchmark_push_back<my_vector<MyTestType, arena_allocator<MyTestType> > >(
+        "my vector my type + arena allocator",
         1'000'000,
         [](size_t i)
         {
