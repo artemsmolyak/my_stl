@@ -18,8 +18,7 @@ void benchmark_push_back(const std::string& name, size_t count, Generator gen)
 
     auto end = std::chrono::high_resolution_clock::now();
 
-    auto duration =
-        std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
     std::cout << name << " push_back: " << duration.count() << " ms \n";
 }

@@ -10,11 +10,14 @@ add_executable(my_stl
     utils.cpp
     my_vector.h
     my_unique_ptr.h
+    my_forward_list.h
 
     my_vector_tests.h
     my_vector_tests.cpp
     my_unique_ptr_tests.h
     my_unique_ptr_tests.cpp
+    my_forward_list_tests.h
+    my_forward_list_tests.cpp
 
     benchmark.h
 

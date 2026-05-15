@@ -4,6 +4,8 @@
 
 #include "my_unique_ptr_tests.h"
 #include "my_vector_tests.h"
+#include "my_forward_list_tests.h"
+
 #include "my_vector.h"
  
 #include "benchmark.h"
@@ -35,9 +37,13 @@ int main()
     RUN_TEST(my_unique_ptr_tests::test_reset);
     RUN_TEST(my_unique_ptr_tests::test_release);
 
+    // my forward list
+    RUN_TEST(my_forward_list_tests::test_empty);
+
+
     log("All tests passed\n\n");
     
-    // benchmark
+    // benchmarks
     constexpr size_t N = 10'000'000;
 
     benchmark_push_back<std::vector<int>>(

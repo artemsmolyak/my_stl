@@ -38,6 +38,7 @@ arena_allocator(size_t size)
     m_all_size = size;
     m_cur_size = 0;
 }
+
 T* allocate(size_t size)
 {
     assert(size < (m_all_size - m_cur_size));
