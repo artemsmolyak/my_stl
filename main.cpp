@@ -112,7 +112,7 @@ int main()
         }
     );
 
-    benchmark_push_back<my_vector<MyTestType, arena_allocator<MyTestType> > >(
+    benchmark_push_back< my_vector<MyTestType, arena_allocator<MyTestType> > >(
         "my vector my type + arena allocator",
         1'000'000,
         [](size_t i)

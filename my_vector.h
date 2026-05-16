@@ -1,4 +1,5 @@
 #pragma once
+
 #include "utils.h"
 #include "my_alloc.h"
 
@@ -8,8 +9,15 @@
 // 3. Self-assignment problem
 // 4. Copy-and-swap idiom
 
-// 5. TO DO small vector optimization
-// 6. TO DO is_trivially_copyable optimisation
+// 5. TODO: small vector optimization (SBO)
+// 6. Trivially copyable optimization
+
+// For allocation, also can be used:
+// 1. std::uninitialized_copy instead of new (current_ptr) T(*other_ptr)
+//    std::construct_at instead of new (m_data + m_size) T(value)
+//    std::destroy_at(ptr) instead of manual destructor calls
+// 2. Also can use std::unique_ptr
+// 3. Also can use custom allocator + std::allocator_traits<T>
  
 
 template <typename T, typename Allocator = my_alloc<T>>
@@ -29,33 +37,49 @@ private:
     size_t m_capacity; //8 byte
 
 public:
-my_vector(const Allocator alloc = Allocator()):
-m_data(nullptr), m_size(0), m_capacity(0)
+my_vector(Allocator alloc = Allocator()):
+m_data(nullptr), 
+m_size(0), 
+m_capacity(0),
+m_alloc(std::move(alloc))
 {}
 
 my_vector(const my_vector& other):
 m_size(other.m_size),
 m_capacity(other.m_capacity),
-m_alloc(other.m_alloc),
+m_alloc(Allocator()),  //better option m_alloc(std::allocator_traits<Allocator>::select_on_container_copy_construction(other.m_alloc))
 m_data(m_alloc.allocate(other.m_capacity))
-{
-    // also can use std::uninialized_copy here
+{   
     auto current_ptr = begin();
     auto other_ptr = other.begin();
-    try{        
-        for(; current_ptr != end(); ++current_ptr, ++other_ptr)
-        {
-            new (current_ptr) T(*other_ptr);
-        }
-    }
-    catch(...)
+
+    // trivially copyable optimisation
+    if constexpr (std::is_trivially_copyable_v<T>)
     {
-        auto it = begin();
-        for(; it != current_ptr; ++it)
-            (*it).~T();
-            
-        m_alloc.deallocate(m_data, m_capacity);
-        throw;    
+        std::memcpy(current_ptr, other_ptr, other.m_size * sizeof(T)); 
+    }
+    else
+    {
+        // can be replaced with std::uninitialized_copy(other.begin(), other.end(), begin());
+        try{        
+            for(; current_ptr != end(); ++current_ptr, ++other_ptr)
+            {
+                
+                    new (current_ptr) T(*other_ptr);
+
+                    // example with allocator_traits    
+                    // std::allocator_traits<Allocator>::construct(&m_alloc, current_ptr, *other_ptr);
+            }
+        }
+        catch(...)
+        {
+            auto it = begin();
+            for(; it != current_ptr; ++it)
+                (*it).~T();
+                
+            m_alloc.deallocate(m_data, m_capacity);
+            throw;    
+        }
     } 
 }
 
@@ -76,7 +100,6 @@ m_data(std::exchange(other.m_data, nullptr))
     if (m_data)
         m_alloc.deallocate(m_data, m_capacity);
 }
-
 
 void reallocation(size_t new_capacity)
 {   
