@@ -2,6 +2,12 @@
 
 #include <string>
 
+struct MyTestType
+{
+    int a;
+    std::string s;
+};
+
 template<typename VectorType, typename Generator>
 void benchmark_push_back(const std::string& name, size_t count, Generator gen)
 {
@@ -14,20 +20,32 @@ void benchmark_push_back(const std::string& name, size_t count, Generator gen)
         vec.push_back(gen(i));
     }
 
-    volatile size_t sink = vec.size(); // for compiler
+    volatile size_t sink = vec.size(); // for compiler. ????
 
     auto end = std::chrono::high_resolution_clock::now();
-
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
     std::cout << name << " push_back: " << duration.count() << " ms \n";
 }
 
-struct MyTestType
+ 
+template <typename ListType, typename Generator>
+void benchmark_push_front(const std::string& name, size_t count, Generator gen)
 {
-    int a;
-    std::string s;
-};
+    auto start = std::chrono::high_resolution_clock::now();
+
+    ListType list;
+
+    for (size_t i = 0; i < count; ++i)
+    {
+        list.push_front(gen(i));
+    }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+    std::cout << name << " push_front: " << duration.count() << " ms\n";
+}
 
 
  

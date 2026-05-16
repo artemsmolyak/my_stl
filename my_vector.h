@@ -20,7 +20,7 @@
 // 3. Also can use custom allocator + std::allocator_traits<T>
  
 
-template <typename T, typename Allocator = my_alloc<T>>
+template <typename T, typename Allocator = My_alloc<T>>
 class my_vector
 {
 public:

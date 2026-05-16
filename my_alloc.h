@@ -2,7 +2,7 @@
 
 // simple stateless allocator
 template <typename T>
-class my_alloc
+class My_alloc
 {
 public:
     T* allocate(size_t size)
@@ -18,7 +18,7 @@ public:
 
 
 template <typename T>
-class arena_allocator
+class Arena_allocator
 {
     T* m_memory;
     size_t m_all_size;
@@ -32,22 +32,22 @@ public:
 using propagate_on_container_copy_assignment = std::false_type;
 using propagate_on_container_move_assignment = std::true_type; 
 
-arena_allocator(const arena_allocator& other) = delete;
-arena_allocator& operator=(const arena_allocator&) = delete;
+Arena_allocator(const Arena_allocator& other) = delete;
+Arena_allocator& operator=(const Arena_allocator&) = delete;
 
-arena_allocator(arena_allocator&& other):
+Arena_allocator(Arena_allocator&& other):
 m_memory(std::exchange(other.m_memory, nullptr)),
 m_all_size(std::exchange(other.m_all_size, 0)),
 m_cur_size(std::exchange(other.m_cur_size, 0))
 {
 }
 
-arena_allocator()
-:arena_allocator(DEFAULT_SIZE)
+Arena_allocator()
+:Arena_allocator(DEFAULT_SIZE)
 {
 }
 
-arena_allocator(size_t size):
+Arena_allocator(size_t size):
 m_all_size(size),
 m_cur_size(0)
 {
@@ -69,7 +69,7 @@ void deallocate(T* ptr, size_t size)
     //skip deallocation for small allocations    
 }
 
-~arena_allocator()
+~Arena_allocator()
 {
     operator delete(m_memory);
 }

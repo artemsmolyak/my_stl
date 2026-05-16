@@ -1,6 +1,8 @@
 #include <cassert>
 #include <iostream>
 #include <string>
+#include <vector>
+#include <forward_list>
 
 #include "my_unique_ptr_tests.h"
 #include "my_vector_tests.h"
@@ -44,6 +46,7 @@ int main()
     log("All tests passed\n\n");
     
     // benchmarks
+    log("====== benchmarks vector ======");
     constexpr size_t N = 10'000'000;
 
     benchmark_push_back<std::vector<int>>(
@@ -56,7 +59,7 @@ int main()
         [](size_t i) { return (int)i; }
     );
 
-    benchmark_push_back<my_vector<int, arena_allocator<int> > >(
+    benchmark_push_back<my_vector<int, Arena_allocator<int> > >(
         "my_vector<int, my allocator>", 10'000'000,
         [](size_t i) { return (int)i; }
     );
@@ -79,7 +82,7 @@ int main()
         }
     );
 
-    benchmark_push_back< my_vector<std::string, arena_allocator<std::string> > >(
+    benchmark_push_back< my_vector<std::string, Arena_allocator<std::string> > >(
         "my_vector<string> + arena allocator", 1'000'000,
         [](size_t i)
         {
@@ -112,7 +115,7 @@ int main()
         }
     );
 
-    benchmark_push_back< my_vector<MyTestType, arena_allocator<MyTestType> > >(
+    benchmark_push_back< my_vector<MyTestType, Arena_allocator<MyTestType> > >(
         "my vector my type + arena allocator",
         1'000'000,
         [](size_t i)
@@ -123,6 +126,27 @@ int main()
             };
         }
     );
+
+    log("\n====== benchmarks list ======");
+
+     benchmark_push_front< my_forward_list<int> >(
+        "my forward list <int>",
+        1'000'000,
+        [](size_t i) { return (int)i; }
+    );
+     
+    benchmark_push_front< std::forward_list<int> >(
+        "std::forward list",
+        1'000'000,
+        [](size_t i) { return (int)i; }
+    );
+
+    benchmark_push_front< my_forward_list<int, My_alloc<int> > >(
+        "my forward list + my allocator",
+        1'000'000,
+        [](size_t i) { return (int)i; }
+    );
+
  
     return 0;
 }

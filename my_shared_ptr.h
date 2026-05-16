@@ -20,7 +20,7 @@ struct my_constrol_block
     T* ptr;
 };
 
-template<typename T, typename Allocator = my_alloc<T>>
+template<typename T, typename Allocator = My_alloc<T>>
 class my_shared_ptr
 {
 public:

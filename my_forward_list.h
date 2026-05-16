@@ -6,22 +6,25 @@
 
 #include "my_alloc.h"
 
-template <typename U>
-struct Node
-{
-    Node* next;
-    U value; 
-};
 
-template <typename T, typename Allocator = my_alloc<Node <T> > >
+template <typename T, typename Allocator = My_alloc<T> >
 class my_forward_list
 {
-    Node<T>* m_head;
+    struct Node
+    {
+        Node* next;
+        T value; 
+    };
+
+    // should be rebind pattern using NodeAlloc = std::allocator_traits<Allocator>::rebind_alloc<Node>;
+    using NodeAllocator = My_alloc<Node>;
+    NodeAllocator m_alloc;
+
+    Node* m_head;
     size_t m_size;
 
-    Allocator m_alloc; 
-
 public:
+
 my_forward_list():
 m_head(nullptr),
 m_size(0)
@@ -32,17 +35,22 @@ void push_front(const T& val)
 {
     if (!m_head)
     {
-        Node<T>* memNode = m_alloc.allocate(1);
-        new (memNode) Node<T>{nullptr, val};
+        Node* memNode = m_alloc.allocate(1);
+        new (memNode) Node{nullptr, val};
         m_head = memNode; 
     }
     else
     {
-        Node<T>* memNode = m_alloc.allocate(1);
-        new (memNode) Node<T>{m_head, val};
+        Node* memNode = m_alloc.allocate(1);
+        new (memNode) Node{m_head, val};
         m_head = memNode;
     }
     m_size++;
+}
+
+size_t size() const
+{
+    return m_size;
 }
 
 bool empty()
@@ -56,7 +64,7 @@ void pop_front()
     m_head = m_head->next;
     --m_size;
     
-    to_remove->~Node<T>();
+    to_remove->~Node();
     operator delete(to_remove);
 }
 

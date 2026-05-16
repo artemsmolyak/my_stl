@@ -19,6 +19,8 @@ Push back:
 What is worth learning from smart pointers:
 
 
+// What is worth learning from forward_list:
+// - How to handle template type T and Allocator<T>? The allocator should work with Node<T>, using rebind (rebound allocator)
 
 
 // Good references:
