@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <iomanip> //std::setw
 
 struct MyTestType
 {
@@ -8,24 +9,29 @@ struct MyTestType
     std::string s;
 };
 
-template<typename VectorType, typename Generator>
-void benchmark_push_back(const std::string& name, size_t count, Generator gen)
+template<typename VectorType, typename Generator, typename... Args>
+void benchmark_push_back(const std::string& name, size_t count, Generator gen, Args&&... args)
 {
     auto start = std::chrono::high_resolution_clock::now();
 
-    VectorType vec;
+    VectorType vec(std::forward<Args>(args)...);
+    //vec.reserve(count);
 
     for(size_t i = 0; i < count; ++i)
     {
         vec.push_back(gen(i));
     }
 
-    volatile size_t sink = vec.size(); // for compiler. ????
+    volatile size_t sink = vec.size(); // for compiler
 
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
-    std::cout << name << " push_back: " << duration.count() << " ms \n";
+    std::cout << std::left
+          << std::setw(60)
+          << (name + " push_back:")
+          << duration.count()
+          << " ms\n";
 }
 
  
@@ -44,7 +50,11 @@ void benchmark_push_front(const std::string& name, size_t count, Generator gen)
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
-    std::cout << name << " push_front: " << duration.count() << " ms\n";
+    std::cout << std::left
+        << std::setw(60)
+        << (name + " push_front:")
+        << duration.count() 
+        << " ms\n";
 }
 
 

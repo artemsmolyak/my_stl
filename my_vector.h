@@ -24,6 +24,10 @@ template <typename T, typename Allocator = My_alloc<T>>
 class my_vector
 {
 public:
+
+    // TO DO using value_type = typename std::allocator_traits<Allocator>::value_type;
+    // The allocator should know better the actual type, because it can perform optimizations with memory allocation and construction.
+
     using my_type = T;
     using iterator = T*;
     using const_iterator = const T*;

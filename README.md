@@ -19,11 +19,14 @@ Push back:
 What is worth learning from smart pointers:
 
 
-// What is worth learning from forward_list:
-// - How to handle template type T and Allocator<T>? The allocator should work with Node<T>, using rebind (rebound allocator)
+What is worth learning from forward_list:
+// - How to handle template type T and Allocator<T> but work with Allocator<Node<T>>? The allocator should work with Node<T>, using rebind (rebound allocator)
 
 
-// Good references:
-// - Patrice Roy: "C++ Memory Management"
-// - Clang/libstdc++ STL implementation
-// - Ilya Mesharin (Mesherin Ilya): https://www.youtube.com/@mesyarik
+
+
+
+Good references:
+- Patrice Roy: "C++ Memory Management"
+- Clang/libstdc++ STL implementation https://github.com/llvm/llvm-project
+- Ilya Mesharin (Mesherin Ilya): https://www.youtube.com/@mesyarik

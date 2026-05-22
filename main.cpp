@@ -46,36 +46,85 @@ int main()
     log("All tests passed\n\n");
     
     // benchmarks
-    log("====== benchmarks vector ======");
-    constexpr size_t N = 10'000'000;
+    log("====== benchmarks vector <int> ======");
+    constexpr size_t N = 500'000;
+
+    {
+        //ulimit -s 65532
+        alignas(int) std::byte array[4 * N * sizeof(int)];
+        SequentialBufferAllocator<int> buf(array, 4 * N);
+        benchmark_push_back<std::vector<int, SequentialBufferAllocator<int> > >(
+            "std::vector<int> + SequentialBufferAllocator", 
+            N,
+            [](size_t i) { return (int)i; },
+            buf
+        );
+    }
 
     benchmark_push_back<std::vector<int>>(
-        "std::vector<int>", 10'000'000,
+        "std::vector<int>", N,
         [](size_t i) { return (int)i; }
     );
 
-    benchmark_push_back<std::vector<int>>(
-        "my_vector<int>", 10'000'000,
+    {
+        alignas(int) std::byte array[4 * N * sizeof(int)];
+        SequentialBufferAllocator<int> buf(array, 4 * N);
+        benchmark_push_back<my_vector<int, SequentialBufferAllocator<int> > >(
+            "my_vector<int> + SequentialBufferAllocator", N,
+            [](size_t i) { return (int)i; },
+            buf
+        );
+    }
+
+    benchmark_push_back<my_vector<int>>(
+        "my_vector<int>", N,
+        [](size_t i) { return (int)i; }
+    );
+
+    benchmark_push_back< my_vector<int, std::allocator<int> > >(
+        "my_vector<int> + std::allocator", N,
         [](size_t i) { return (int)i; }
     );
 
     benchmark_push_back<my_vector<int, Arena_allocator<int> > >(
-        "my_vector<int, my allocator>", 10'000'000,
+        "my_vector<int, my allocator>", N,
         [](size_t i) { return (int)i; }
     );
 
     log("\n");
 
+
+    {
+        alignas(std::string) std::byte array[4 * N * sizeof(sizeof(std::string))];
+        SequentialBufferAllocator<std::string> buf(array, 4 * N);
+        benchmark_push_back<std::vector<std::string, SequentialBufferAllocator<std::string> > >(
+            "std::vector<string> + SequentialBufferAllocator", N,
+            [](size_t i)
+            {
+                return std::string("hello_") + std::to_string(i);
+            },
+            buf
+        );
+    }
+
     benchmark_push_back<std::vector<std::string>>(
-        "std::vector<string>", 1'000'000,
+        "std::vector<string>", N,
         [](size_t i)
         {
             return std::string("hello_") + std::to_string(i);
         }
     );
 
-    benchmark_push_back<std::vector<std::string>>(
-        "my_vector<string>", 1'000'000,
+    benchmark_push_back<my_vector<std::string>>(
+        "my_vector<string>", N,
+        [](size_t i)
+        {
+            return std::string("hello_") + std::to_string(i);
+        }
+    );
+
+    benchmark_push_back<my_vector<std::string, std::allocator<std::string> > >(
+        "my_vector<string> + std::allocator", N,
         [](size_t i)
         {
             return std::string("hello_") + std::to_string(i);
@@ -83,7 +132,7 @@ int main()
     );
 
     benchmark_push_back< my_vector<std::string, Arena_allocator<std::string> > >(
-        "my_vector<string> + arena allocator", 1'000'000,
+        "my_vector<string> + arena allocator", N,
         [](size_t i)
         {
             return std::string("hello_") + std::to_string(i);
@@ -93,7 +142,7 @@ int main()
 
     benchmark_push_back<std::vector<MyTestType>>(
         "std::vector my type",
-        1'000'000,
+        N,
         [](size_t i)
         {
             return MyTestType{
@@ -105,7 +154,19 @@ int main()
 
     benchmark_push_back<my_vector<MyTestType>>(
         "my vector my type",
-        1'000'000,
+        N,
+        [](size_t i)
+        {
+            return MyTestType{
+                (int)i,
+                "data_" + std::to_string(i)
+            };
+        }
+    );
+
+    benchmark_push_back<my_vector<MyTestType, std::allocator<MyTestType> > >(
+        "my vector my type + std::allocator",
+        N,
         [](size_t i)
         {
             return MyTestType{
@@ -117,7 +178,7 @@ int main()
 
     benchmark_push_back< my_vector<MyTestType, Arena_allocator<MyTestType> > >(
         "my vector my type + arena allocator",
-        1'000'000,
+        N,
         [](size_t i)
         {
             return MyTestType{
@@ -131,19 +192,25 @@ int main()
 
      benchmark_push_front< my_forward_list<int> >(
         "my forward list <int>",
-        1'000'000,
+        N,
         [](size_t i) { return (int)i; }
     );
      
     benchmark_push_front< std::forward_list<int> >(
         "std::forward list",
-        1'000'000,
+        N,
         [](size_t i) { return (int)i; }
     );
 
     benchmark_push_front< my_forward_list<int, My_alloc<int> > >(
         "my forward list + my allocator",
-        1'000'000,
+        N,
+        [](size_t i) { return (int)i; }
+    );
+
+    benchmark_push_front< my_forward_list<int, std::allocator<int> > >(
+        "my forward list + std::allocator",
+        N,
         [](size_t i) { return (int)i; }
     );
 
