@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cassert>
+
 // simple stateless allocator
 template <typename T>
 class My_alloc

@@ -2,6 +2,7 @@
 
 #include <string>
 #include <iomanip> //std::setw
+#include <iostream>
 
 struct MyTestType
 {
